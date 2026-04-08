@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/eventList">
+
+    <fragment
+        android:id="@+id/eventList"
+        android:name="com.example.eventplanner.EventListFragment"
+        android:label="My Events"
+        tools:layout="@layout/fragment_event_list">
+        <action
+            android:id="@+id/action_eventList_to_addEvent"
+            app:destination="@id/addEvent" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addEvent"
+        android:name="com.example.eventplanner.AddEventFragment"
+        android:label="Add/Edit Event"
+        tools:layout="@layout/fragment_add_event" />
+
+</navigation>
