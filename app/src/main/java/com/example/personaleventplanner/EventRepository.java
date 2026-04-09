@@ -4,6 +4,7 @@ import android.content.Context;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class EventRepository {
     private EventDao eventDao;
@@ -27,11 +28,16 @@ public class EventRepository {
         executorService.execute(() -> eventDao.delete(event));
     }
 
-    public List<Event> getAllEvents() {
-        return eventDao.getAllEvents();
+    // FIXED: Use callback instead of returning directly on main thread
+    public void getAllEvents(OnEventsLoadedListener listener) {
+        executorService.execute(() -> {
+            List<Event> events = eventDao.getAllEvents();
+            android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+            mainHandler.post(() -> listener.onEventsLoaded(events));
+        });
     }
 
-    public Event getEventById(int id) {
-        return eventDao.getEventById(id);
+    public interface OnEventsLoadedListener {
+        void onEventsLoaded(List<Event> events);
     }
 }

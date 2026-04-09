@@ -10,12 +10,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.navigation.Navigation;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventListFragment extends Fragment {
     private RecyclerView recyclerView;
     private EventAdapter eventAdapter;
     private EventRepository repository;
+    private List<Event> events = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -26,20 +28,7 @@ public class EventListFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        loadEvents();
-
-        FloatingActionButton fab = view.findViewById(R.id.fabAdd);
-        fab.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putBoolean("isEdit", false);
-            Navigation.findNavController(v).navigate(R.id.action_eventList_to_addEvent, bundle);
-        });
-
-        return view;
-    }
-
-    private void loadEvents() {
-        List<Event> events = repository.getAllEvents();
+        // Set empty adapter first
         eventAdapter = new EventAdapter(events,
                 event -> {
                     // Edit event
@@ -55,12 +44,33 @@ public class EventListFragment extends Fragment {
                 event -> {
                     // Delete event
                     repository.delete(event);
-                    loadEvents();
                     Toast.makeText(getContext(), "Event deleted", Toast.LENGTH_SHORT).show();
+                    loadEvents(); // Reload after delete
                 }
         );
-
         recyclerView.setAdapter(eventAdapter);
+
+        loadEvents();
+
+        FloatingActionButton fab = view.findViewById(R.id.fabAdd);
+        fab.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("isEdit", false);
+            Navigation.findNavController(v).navigate(R.id.action_eventList_to_addEvent, bundle);
+        });
+
+        return view;
+    }
+
+    private void loadEvents() {
+        repository.getAllEvents(new EventRepository.OnEventsLoadedListener() {
+            @Override
+            public void onEventsLoaded(List<Event> loadedEvents) {
+                events.clear();
+                events.addAll(loadedEvents);
+                eventAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override

@@ -9,8 +9,10 @@ import android.view.ViewGroup;
 import android.widget.*;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class AddEventFragment extends Fragment {
     private EditText titleInput, locationInput;
@@ -21,6 +23,7 @@ public class AddEventFragment extends Fragment {
     private Calendar selectedDateTime;
     private boolean isEdit = false;
     private int editEventId = -1;
+    private SimpleDateFormat dateFormat;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -28,6 +31,7 @@ public class AddEventFragment extends Fragment {
 
         repository = new EventRepository(getContext());
         selectedDateTime = Calendar.getInstance();
+        dateFormat = new SimpleDateFormat("MMM dd, yyyy - hh:mm a", Locale.getDefault());
 
         titleInput = view.findViewById(R.id.editTitle);
         locationInput = view.findViewById(R.id.editLocation);
@@ -51,6 +55,7 @@ public class AddEventFragment extends Fragment {
             selectedDateTime.setTime(new Date(getArguments().getLong("dateTime")));
             updateDateTimeDisplay();
         } else {
+            // Set default to tomorrow (avoid past date error)
             selectedDateTime.add(Calendar.DAY_OF_MONTH, 1);
             updateDateTimeDisplay();
         }
@@ -80,8 +85,7 @@ public class AddEventFragment extends Fragment {
     }
 
     private void updateDateTimeDisplay() {
-        android.text.format.DateFormat df = new android.text.format.DateFormat();
-        dateTimeText.setText(android.text.format.DateFormat.format("MMM dd, yyyy - hh:mm a", selectedDateTime));
+        dateTimeText.setText(dateFormat.format(selectedDateTime.getTime()));
     }
 
     private void saveEvent() {
@@ -89,6 +93,7 @@ public class AddEventFragment extends Fragment {
         String location = locationInput.getText().toString().trim();
         String category = categorySpinner.getSelectedItem().toString();
 
+        // Validation 1: Title not empty
         if (title.isEmpty()) {
             Toast.makeText(getContext(), "Title cannot be empty", Toast.LENGTH_SHORT).show();
             return;
@@ -97,6 +102,7 @@ public class AddEventFragment extends Fragment {
         Date eventDate = selectedDateTime.getTime();
         Date currentDate = new Date();
 
+        // Validation 2: No past dates
         if (eventDate.before(currentDate)) {
             Toast.makeText(getContext(), "Cannot create event in the past", Toast.LENGTH_SHORT).show();
             return;

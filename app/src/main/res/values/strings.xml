@@ -1,4 +1,5 @@
 <resources>
+    <string name="app_name">Personal Event Planner</string>
     <string-array name="categories">
         <item>Work</item>
         <item>Social</item>
