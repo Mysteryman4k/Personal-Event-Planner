@@ -36,4 +36,3 @@ The **Personal Event Planner App** is an Android application developed for the S
 | **RecyclerView** | Display list of events |
 | **Material Design** | UI components |
 
-## 📁 Project Structure
